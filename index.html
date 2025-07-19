@@ -169,6 +169,17 @@
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
             outline: none;
         }
+        /* 访问量计数器样式 */
+        #visitsCounter {
+            text-align: center;
+            margin-top: 20px;
+        }
+        #visitsCounter img {
+            max-width: 100%; /* 确保图片不会超出容器 */
+            height: auto;
+            vertical-align: middle; /* 垂直居中 */
+            border: none; /* 移除图片边框 */
+        }
     </style>
 </head>
 <body>
@@ -197,11 +208,32 @@
         </div>
         <div class="footer">
             <p>感谢您使用 auroraverse 的直链解析服务。</p>
-            </div>
+            <div id="visitsCounter">
+                </div>
+        </div>
     </div>
 
     <script>
         document.getElementById('parseButton').addEventListener('click', parseLink);
+
+        // 页面加载完成后立即加载访问量计数器
+        document.addEventListener('DOMContentLoaded', loadVisitsCounter);
+
+        function loadVisitsCounter() {
+            const visitsApiUrl = 'https://api.yyy001.com/api/Visits?name=auroraverse'; // 自定义名称为 auroraverse
+            const visitsCounterDiv = document.getElementById('visitsCounter');
+            
+            // 创建一个 img 元素来显示计数器图片
+            const img = document.createElement('img');
+            img.src = visitsApiUrl;
+            img.alt = '访问量统计';
+            img.title = '本页面访问量统计'; // 鼠标悬停提示
+            img.onerror = () => { // 图片加载失败时的处理
+                visitsCounterDiv.innerHTML = '<p style="color:#6c757d; font-size:0.8em;">访问量统计加载失败。</p>';
+            };
+            visitsCounterDiv.innerHTML = ''; // 清空原有内容
+            visitsCounterDiv.appendChild(img);
+        }
 
         async function parseLink() {
             const url = document.getElementById('urlInput').value.trim();
