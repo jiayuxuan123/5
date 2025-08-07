@@ -3,342 +3,497 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>网盘文件直链解析工具 - auroraverse</title>
+    <title>多网盘直链解析工具</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
+            font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
             margin: 0;
             padding: 20px;
             display: flex;
             justify-content: center;
             align-items: flex-start;
             min-height: 100vh;
-            color: #333;
+            box-sizing: border-box;
         }
         .container {
             background-color: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 700px;
+            max-width: 750px;
             box-sizing: border-box;
         }
         h1 {
             text-align: center;
-            color: #2c3e50;
+            color: #1a237e;
             margin-bottom: 30px;
-            font-size: 2em;
+            font-size: 2.2em;
             position: relative;
         }
         h1::after {
             content: '';
-            width: 60px;
+            width: 80px;
             height: 4px;
-            background-color: #007bff;
+            background-color: #4285f4;
             position: absolute;
-            bottom: -10px;
+            bottom: -15px;
             left: 50%;
             transform: translateX(-50%);
             border-radius: 2px;
         }
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
+            margin-bottom: 10px;
+            font-weight: 500;
             color: #555;
+            font-size: 1.1em;
         }
-        input[type="text"] {
-            width: calc(100% - 22px);
-            padding: 12px;
+        input[type="text"], select {
+            width: calc(100% - 24px);
+            padding: 14px;
             border: 1px solid #ddd;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 1em;
             transition: border-color 0.3s, box-shadow 0.3s;
+            background-color: #f9f9f9;
         }
-        input[type="text"]:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        input[type="text"]:focus, select:focus {
+            border-color: #4285f4;
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.25);
             outline: none;
         }
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 12px 25px;
-            border: none;
+        .auth-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .auth-actions button {
+            width: auto;
+            padding: 8px 15px;
+            font-size: 1em;
             border-radius: 8px;
+            color: white;
+            background-color: #f4b400;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .auth-actions button:hover {
+            background-color: #e69d00;
+        }
+        .auth-actions label {
+            margin: 0;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
             cursor: pointer;
-            font-size: 1.1em;
-            font-weight: bold;
+        }
+        .auth-actions input[type="checkbox"] {
+            margin-right: 5px;
+            width: auto;
+        }
+        button {
+            background-color: #4285f4;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: 700;
             transition: background-color 0.3s, transform 0.2s;
             width: 100%;
+            letter-spacing: 1px;
+            box-sizing: border-box;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #3367d6;
             transform: translateY(-2px);
         }
         button:active {
             transform: translateY(0);
         }
+        button:disabled {
+            background-color: #b0b0b0;
+            cursor: not-allowed;
+            transform: none;
+        }
         #result {
-            background-color: #e9ecef;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 20px;
+            background-color: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            border-radius: 10px;
+            padding: 25px;
             margin-top: 30px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            min-height: 100px;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.95em;
-            line-height: 1.6;
-            color: #343a40;
+            min-height: 120px;
+            font-size: 1em;
+            line-height: 1.8;
+            color: #388e3c;
             overflow-x: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
         }
         .error {
-            color: #dc3545;
-            font-weight: bold;
+            color: #d32f2f;
+            font-weight: 500;
             text-align: center;
-            margin-top: 15px;
         }
         .loading {
             text-align: center;
-            margin-top: 15px;
-            color: #007bff;
-            font-weight: bold;
+            color: #4285f4;
+            font-weight: 500;
         }
-        .success-message {
-            color: #28a745;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 15px;
+        .tip {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #777;
+            line-height: 1.6;
+            border-top: 1px dashed #e0e0e0;
+            padding-top: 20px;
         }
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            font-size: 0.85em;
-            color: #6c757d;
+        .tip strong {
+            color: #333;
         }
-        .footer a {
-            color: #007bff;
+        .tip a {
+            color: #4285f4;
             text-decoration: none;
         }
-        .footer a:hover {
+        .tip a:hover {
             text-decoration: underline;
         }
-        /* 新增下载按钮样式 */
-        .download-btn {
-            display: block; /* 让按钮独占一行 */
-            width: fit-content; /* 宽度适应内容 */
-            margin: 20px auto 0 auto; /* 居中显示，顶部有间距 */
-            background-color: #28a745; /* 绿色按钮 */
-            color: white;
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px; /* 按钮之间的间距 */
+            margin-top: 20px;
+        }
+        .action-buttons .btn {
             padding: 12px 25px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1.1em;
             font-weight: bold;
-            text-align: center;
-            text-decoration: none; /* 移除a标签下划线 */
+            text-decoration: none;
             transition: background-color 0.3s, transform 0.2s;
+            flex: 1; /* 让按钮平分空间 */
+            text-align: center;
+            color: white;
+            box-sizing: border-box;
         }
-        .download-btn:hover {
-            background-color: #218838;
+        .action-buttons .btn-download {
+            background-color: #2e7d32;
+        }
+        .action-buttons .btn-download:hover {
+            background-color: #1b5e20;
             transform: translateY(-2px);
         }
-        .download-btn:active {
-            transform: translateY(0);
+        .action-buttons .btn-copy {
+            background-color: #607d8b;
         }
-        /* 新增 Authorization 输入框样式 */
-        #authInput {
-            width: calc(100% - 22px);
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: border-color 0.3s, box-shadow 0.3s;
-            margin-top: 8px; /* 与上一个输入框间隔 */
+        .action-buttons .btn-copy:hover {
+            background-color: #455a64;
+            transform: translateY(-2px);
         }
-        #authInput:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-            outline: none;
+        .success-info {
+            width: 100%;
+            text-align: left;
+            padding: 0 10px;
         }
-        /* 访问量计数器样式 */
-        #visitsCounter {
-            text-align: center;
-            margin-top: 20px;
-        }
-        #visitsCounter img {
-            max-width: 100%; /* 确保图片不会超出容器 */
-            height: auto;
-            vertical-align: middle; /* 垂直居中 */
-            border: none; /* 移除图片边框 */
+        .success-info p {
+            margin: 5px 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>网盘文件直链解析</h1>
+        <h1>多网盘直链解析工具</h1>
 
         <div class="input-group">
-            <label for="urlInput">网盘分享链接:</label>
-            <input type="text" id="urlInput" placeholder="请输入123网盘或蓝奏云分享链接，例如：https://www.123pan.com/s/R6kKVv-DKv5H.html">
+            <label for="shareLink">网盘分享链接:</label>
+            <input type="text" id="shareLink" placeholder="例如：https://www.123pan.com/s/xxxx-yyyy.html" required>
         </div>
 
         <div class="input-group">
-            <label for="pwdInput">密码 (如果需要):</label>
-            <input type="text" id="pwdInput" placeholder="请输入密码，如果不需要则留空">
+            <label for="password">提取码 (可选):</label>
+            <input type="text" id="password" placeholder="请输入提取码，如果不需要则留空">
         </div>
 
         <div class="input-group">
-            <label for="authInput">Authorization 值 (可选，123盘超100MB需填ey值):</label>
-            <input type="text" id="authInput" placeholder="输入123盘的Authorization值（不带Bearer），小文件可不填">
+            <label for="apiSelect">选择解析服务:</label>
+            <select id="apiSelect">
+                <option value="lz.qaiu.top">公共API #1 (支持多网盘)</option>
+                <option value="pearktrue.cn">公共API #2 (123盘专用)</option>
+                <option value="hhlqilongzhu.cn">公共API #3 (蓝奏云专用)</option>
+            </select>
+        </div>
+        
+        <div class="input-group" id="authorizationGroup">
+            <label for="authorization">Authorization 值 (123盘大文件需要):</label>
+            <input type="text" id="authorization" placeholder="请输入123盘的Authorization值（不带Bearer），小文件可不填">
+            <div class="auth-actions">
+                <label>
+                    <input type="checkbox" id="hideAuthBoxCheckbox"> 下次不再提示此框
+                </label>
+                <button type="button" id="saveAuthButton">保存</button>
+            </div>
         </div>
 
-        <button id="parseButton">解析文件直链</button>
+        <button id="parseButton">解析直链</button>
 
         <div id="result" role="region" aria-live="polite">
-            等待解析...
+            请在上方输入链接并点击解析。
         </div>
-        <div class="footer">
-            <p>感谢您使用 auroraverse 的直链解析服务。</p>
-            <div id="visitsCounter">
-                </div>
+
+        <div class="tip">
+            <p><strong>支持的网盘:</strong></p>
+            <ul>
+                <li>**123云盘** (<a href="https://www.123pan.com/" target="_blank">官网</a>)</li>
+                <li>**蓝奏云** (<a href="https://lanzou.com/" target="_blank">官网</a>)</li>
+                <li>**夸克网盘、阿里云盘**（部分API可能支持，但稳定性需自行测试）</li>
+            </ul>
+            <p><strong>重要提示:</strong></p>
+            <p>1. 本工具依赖第三方公共API服务，解析成功率受API稳定性影响。如果遇到失败，请尝试更换API源。</p>
+            <p>2. 对于 **123云盘大文件** (通常大于100MB)，需要提供 `Authorization` 值。该值可在网页版下载时，通过浏览器开发者工具的网络(Network)面板找到请求头中的 `Authorization: Bearer [ey....]`，只需复制 `ey....` 部分。</p>
+            <p>3. **开源项目推荐:** 如果您经常使用，强烈建议根据 <a href="https://github.com/qaiu/netdisk-fast-download" target="_blank">netdisk-fast-download</a> 项目的说明，自行部署服务以获得更稳定可靠的解析体验。</p>
+            <p><a href="#" id="toggleAuthBox">显示/隐藏授权码输入框</a></p>
         </div>
     </div>
 
     <script>
-        document.getElementById('parseButton').addEventListener('click', parseLink);
-
-        // 页面加载完成后立即加载访问量计数器
-        document.addEventListener('DOMContentLoaded', loadVisitsCounter);
-
-        function loadVisitsCounter() {
-            const visitsApiUrl = 'https://api.yyy001.com/api/Visits?name=auroraverse'; // 自定义名称为 auroraverse
-            const visitsCounterDiv = document.getElementById('visitsCounter');
-            
-            // 创建一个 img 元素来显示计数器图片
-            const img = document.createElement('img');
-            img.src = visitsApiUrl;
-            img.alt = '访问量统计';
-            img.title = '本页面访问量统计'; // 鼠标悬停提示
-            img.onerror = () => { // 图片加载失败时的处理
-                visitsCounterDiv.innerHTML = '<p style="color:#6c757d; font-size:0.8em;">访问量统计加载失败。</p>';
-            };
-            visitsCounterDiv.innerHTML = ''; // 清空原有内容
-            visitsCounterDiv.appendChild(img);
-        }
-
-        async function parseLink() {
-            const url = document.getElementById('urlInput').value.trim();
-            const pwd = document.getElementById('pwdInput').value.trim();
-            const authorization = document.getElementById('authInput').value.trim(); // 获取Authorization值
-
+        document.addEventListener('DOMContentLoaded', () => {
+            const shareLinkInput = document.getElementById('shareLink');
+            const passwordInput = document.getElementById('password');
+            const authorizationInput = document.getElementById('authorization');
+            const apiSelect = document.getElementById('apiSelect');
+            const parseButton = document.getElementById('parseButton');
             const resultDiv = document.getElementById('result');
+            const authorizationGroup = document.getElementById('authorizationGroup');
+            const saveAuthButton = document.getElementById('saveAuthButton');
+            const hideAuthBoxCheckbox = document.getElementById('hideAuthBoxCheckbox');
+            const toggleAuthBox = document.getElementById('toggleAuthBox');
+            let currentDownloadUrl = ''; 
 
-            if (!url) {
-                resultDiv.innerHTML = '<p class="error">请输入网盘分享链接！</p>';
-                return;
+            // === 新增：加载时检查 localStorage 中的设置并相应地显示或隐藏授权框 ===
+            const savedAuthValue = localStorage.getItem('123pan_auth_value');
+            const shouldHideAuthBox = localStorage.getItem('hide_auth_box') === 'true';
+
+            if (savedAuthValue) {
+                authorizationInput.value = savedAuthValue;
             }
 
-            resultDiv.innerHTML = '<p class="loading">正在解析中，请稍候...</p>';
-
-            let apiUrl = '';
-            let isLanzou = false; // 用于区分解析结果显示逻辑
-
-            // 123网盘的域名识别：包含 '123pan.com' 或其他已知域名变体，或匹配类似 '123xxx.com' 的模式
-            const is123PanLink = url.includes('123pan.com') || url.includes('123684.com') || /\b123[a-zA-Z0-9]+\.com/.test(url);
-
-
-            if (is123PanLink) {
-                // 123 网盘 API
-                apiUrl = `https://api.pearktrue.cn/api/123panparse/?url=${encodeURIComponent(url)}`;
-                if (pwd) {
-                    apiUrl += `&pwd=${encodeURIComponent(pwd)}`;
-                }
-                // Authorization 参数的添加
-                if (authorization) {
-                    apiUrl += `&Authorization=${encodeURIComponent(authorization)}`;
-                }
-                isLanzou = false; // 明确设置为非蓝奏云
-            } else if (url.includes('lanzou') || url.includes('woozooo.com')) {
-                // 蓝奏云 API
-                apiUrl = `https://www.hhlqilongzhu.cn/api/lanzouyun_jx.php?url=${encodeURIComponent(url)}`;
-                if (pwd) {
-                    apiUrl += `&pwd=${encodeURIComponent(pwd)}`;
-                }
-                isLanzou = true; // 明确设置为蓝奏云
+            if (shouldHideAuthBox) {
+                authorizationGroup.style.display = 'none';
+                hideAuthBoxCheckbox.checked = true;
             } else {
-                resultDiv.innerHTML = '<p class="error">目前只支持123网盘（例如123pan.com, 123684.com等）和蓝奏云链接。</p>';
-                return;
+                // 如果没有设置隐藏，则根据API选择来决定是否显示
+                const url = shareLinkInput.value.trim();
+                if (url.includes('123pan') || url.includes('123684.com')) {
+                    authorizationGroup.style.display = 'block';
+                } else {
+                    authorizationGroup.style.display = 'none';
+                }
             }
 
-            try {
-                const response = await fetch(apiUrl);
-
-                // 检查HTTP状态码
-                if (!response.ok) {
-                    const errorText = await response.text(); // 尝试获取非JSON的错误信息
-                    throw new Error(`API 请求失败，HTTP 状态码: ${response.status}。详细信息: ${errorText.substring(0, 200)}... (可能返回非JSON内容或服务异常)`);
-                }
-
-                // 尝试获取响应的Content-Type头部
-                const contentType = response.headers.get('content-type');
-
-                let data;
-                if (contentType && contentType.includes('application/json')) {
-                    data = await response.json(); // 尝试解析JSON
+            // === 新增：保存按钮点击事件 ===
+            saveAuthButton.addEventListener('click', () => {
+                const authValue = authorizationInput.value.trim();
+                if (authValue) {
+                    localStorage.setItem('123pan_auth_value', authValue);
+                    alert('Authorization 值已保存！');
                 } else {
-                    // 如果不是JSON，就读取为文本并报错
-                    const rawResponseText = await response.text();
-                    throw new Error(`API 返回的不是 JSON 格式，而是 "${contentType || '未知类型'}"。原始响应可能包含错误信息或维护通知。部分内容: ${rawResponseText.substring(0, 200)}...`);
+                    alert('请输入Authorization值后再保存。');
+                }
+                
+                if (hideAuthBoxCheckbox.checked) {
+                    localStorage.setItem('hide_auth_box', 'true');
+                    authorizationGroup.style.display = 'none';
+                } else {
+                    localStorage.setItem('hide_auth_box', 'false');
+                }
+            });
+
+            // === 新增：链接以123pan开头，且授权框未被隐藏，则显示授权框 ===
+            shareLinkInput.addEventListener('input', () => {
+                const url = shareLinkInput.value.trim();
+                if (url.includes('123pan') || url.includes('123684.com')) {
+                    apiSelect.value = 'pearktrue.cn';
+                    if (!shouldHideAuthBox) {
+                        authorizationGroup.style.display = 'block';
+                    }
+                } else if (url.includes('lanzou') || url.includes('woozooo.com')) {
+                    apiSelect.value = 'hhlqilongzhu.cn';
+                    authorizationGroup.style.display = 'none';
+                } else {
+                    apiSelect.value = 'lz.qaiu.top';
+                    authorizationGroup.style.display = 'none';
+                }
+            });
+
+            apiSelect.addEventListener('change', () => {
+                if (apiSelect.value === 'pearktrue.cn' && !shouldHideAuthBox) {
+                    authorizationGroup.style.display = 'block';
+                } else {
+                    authorizationGroup.style.display = 'none';
+                }
+            });
+            
+            // === 新增：显示/隐藏授权码输入框链接的点击事件 ===
+            toggleAuthBox.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (authorizationGroup.style.display === 'none') {
+                    authorizationGroup.style.display = 'block';
+                } else {
+                    authorizationGroup.style.display = 'none';
+                }
+            });
+
+            parseButton.addEventListener('click', parseLink);
+
+            async function parseLink() {
+                const url = shareLinkInput.value.trim();
+                const pwd = passwordInput.value.trim();
+                const authorization = authorizationInput.value.trim();
+                const selectedApi = apiSelect.value;
+                currentDownloadUrl = ''; 
+
+                if (!url) {
+                    resultDiv.innerHTML = '<p class="error">请输入网盘分享链接！</p>';
+                    return;
                 }
 
-                if (data.code === 200) {
-                    let filename = '';
-                    let filesize = '';
-                    let downloadUrl = '';
+                resultDiv.innerHTML = '<p class="loading">正在解析中，请稍候...</p>';
+                parseButton.disabled = true;
 
-                    if (isLanzou) {
-                        filename = data.name || 'N/A';
-                        filesize = data.filesize || 'N/A';
-                        downloadUrl = data.downUrl || '#'; // 获取蓝奏云下载链接
-                    } else { // 123pan
-                        filename = data.data.filename || 'N/A';
-                        filesize = data.data.size || 'N/A';
-                        downloadUrl = data.data.downloadurl || '#'; // 获取 123 网盘下载链接
+                let apiUrl = '';
+
+                switch (selectedApi) {
+                    case 'lz.qaiu.top':
+                        apiUrl = `https://lz.qaiu.top/json/parser?url=${encodeURIComponent(url)}`;
+                        if (pwd) apiUrl += `&pwd=${encodeURIComponent(pwd)}`;
+                        break;
+                    case 'pearktrue.cn':
+                        apiUrl = `https://api.pearktrue.cn/api/123panparse/?url=${encodeURIComponent(url)}`;
+                        if (pwd) apiUrl += `&pwd=${encodeURIComponent(pwd)}`;
+                        if (authorization) apiUrl += `&Authorization=${encodeURIComponent(authorization)}`;
+                        break;
+                    case 'hhlqilongzhu.cn':
+                        apiUrl = `https://www.hhlqilongzhu.cn/api/lanzouyun_jx.php?url=${encodeURIComponent(url)}`;
+                        if (pwd) apiUrl += `&pwd=${encodeURIComponent(pwd)}`;
+                        break;
+                }
+
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 20000); 
+                    const response = await fetch(apiUrl, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`API请求失败，HTTP状态码: ${response.status}。详细信息: ${errorText.substring(0, 200)}...`);
                     }
 
-                    let output = '<p class="success-message">解析成功！</p>';
-                    output += `<strong>文件名称:</strong> ${filename}<br>`;
-                    output += `<strong>文件大小:</strong> ${filesize}<br>`;
-                    
-                    // 直接添加下载按钮
-                    if (downloadUrl && downloadUrl !== '#') {
-                        // 使用 decodeURIComponent 解码文件名，以防文件名中含有编码字符影响下载
-                        const displayFilename = (filename && filename !== 'N/A') ? filename : '下载文件';
-                        output += `<a href="${downloadUrl}" class="download-btn" target="_blank" download="${displayFilename}">点击下载</a>`;
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        const rawText = await response.text();
+                        throw new Error(`API返回的不是JSON格式。原始响应: ${rawText.substring(0, 200)}...`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.code === 200 && (data.data?.directLink || data.data?.downloadurl || data.downUrl)) {
+                        let filename, filesize, downloadUrl;
+                        if (selectedApi === 'lz.qaiu.top') {
+                            filename = data.data.file_name || 'N/A';
+                            filesize = data.data.file_size || 'N/A';
+                            downloadUrl = data.data.directLink;
+                        } else if (selectedApi === 'pearktrue.cn') {
+                            filename = data.data.filename || 'N/A';
+                            filesize = data.data.size || 'N/A';
+                            downloadUrl = data.data.downloadurl;
+                        } else { 
+                            filename = data.name || 'N/A';
+                            filesize = data.filesize || 'N/A';
+                            downloadUrl = data.downUrl;
+                        }
+                        
+                        currentDownloadUrl = downloadUrl; 
+
+                        let output = '<p class="success-message" style="width: 100%;">解析成功！</p>';
+                        output += `<div class="success-info">`;
+                        output += `<p><strong>文件名称:</strong> ${filename}</p>`;
+                        output += `<p><strong>文件大小:</strong> ${filesize}</p>`;
+                        output += `</div>`;
+                        
+                        if (downloadUrl) {
+                            output += `
+                                <div class="action-buttons">
+                                    <button class="btn btn-copy" id="copyButton">复制直链</button>
+                                    <a href="${downloadUrl}" class="btn btn-download" target="_blank" download>点击下载</a>
+                                </div>
+                            `;
+                        } else {
+                            output = `<p class="error">解析失败: 未获取到下载链接。</p>`;
+                        }
+                        
+                        resultDiv.innerHTML = output;
+
+                        if (downloadUrl) {
+                            document.getElementById('copyButton').addEventListener('click', copyDirectLink);
+                        }
                     } else {
-                        output += `<p class="error">未获取到下载链接。</p>`;
+                        resultDiv.innerHTML = `<p class="error">解析失败: ${data.msg || '无法获取直链，请检查链接或密码。'}</p>`;
                     }
-                    
-                    resultDiv.innerHTML = output;
-
-                } else {
-                    resultDiv.innerHTML = `<p class="error">解析失败: ${data.msg || '未知错误'}</p>`;
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        resultDiv.innerHTML = `<p class="error">请求超时，API未在预定时间内响应。</p>`;
+                    } else {
+                        resultDiv.innerHTML = `<p class="error">请求处理过程中发生错误：</p><p class="error">${error.message}</p>`;
+                    }
+                    console.error('Error fetching data:', error);
+                } finally {
+                    parseButton.disabled = false;
                 }
-            } catch (error) {
-                // 更详细的错误信息
-                resultDiv.innerHTML = `<p class="error">请求处理过程中发生错误：</p><p class="error-detail">${error.message}</p><p class="error-tip">请检查您输入的链接和密码是否正确，${is123PanLink && '对于123网盘大文件请检查Authorization值是否正确，'}并确认网盘解析API服务是否正常。</p>`;
-                console.error('Error fetching data:', error);
             }
-        }
+
+            function copyDirectLink() {
+                if (currentDownloadUrl) {
+                    navigator.clipboard.writeText(currentDownloadUrl).then(() => {
+                        const copyButton = document.getElementById('copyButton');
+                        copyButton.textContent = '已复制!';
+                        setTimeout(() => {
+                            copyButton.textContent = '复制直链';
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('复制失败:', err);
+                        const textArea = document.createElement("textarea");
+                        textArea.value = currentDownloadUrl;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        try {
+                            document.execCommand('copy');
+                            const copyButton = document.getElementById('copyButton');
+                            copyButton.textContent = '已复制!';
+                            setTimeout(() => {
+                                copyButton.textContent = '复制直链';
+                            }, 2000);
+                        } catch (err) {
+                            alert('复制失败，请手动复制链接。');
+                        }
+                        document.body.removeChild(textArea);
+                    });
+                }
+            }
+        });
     </script>
 </body>
 </html>
